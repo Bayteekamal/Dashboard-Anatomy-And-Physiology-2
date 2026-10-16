@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anatomi & Fisiologi — Dashboard + Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Roboto',sans-serif;background:#F3F4F6;color:#1F2328;font-size:14px;line-height:1.6;min-height:100vh}
+
+/* ── APP BAR ── */
+.app-bar{position:sticky;top:0;z-index:200;background:#1A73E8;color:#fff;height:56px;display:flex;align-items:center;padding:0 16px;box-shadow:0 2px 6px rgba(0,0,0,0.28);gap:12px}
+.app-bar-logo{width:30px;height:30px;background:#fff;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#1A73E8;flex-shrink:0}
+.app-bar-title{font-size:18px;font-weight:500;flex:1}
+.app-bar-back{display:none;align-items:center;gap:6px;background:rgba(255,255,255,0.15);border:none;color:#fff;padding:6px 14px;border-radius:20px;cursor:pointer;font-family:'Roboto',sans-serif;font-size:13px;font-weight:500;transition:background .15s}
+.app-bar-back:hover{background:rgba(255,255,255,0.28)}
+.app-bar-back svg{width:16px;height:16px;fill:#fff}
+.app-bar-back.visible{display:flex}
+.app-bar-chips{display:flex;gap:6px;align-items:center}
+.chip{background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.35);border-radius:16px;padding:2px 10px;font-size:11px;color:#fff;white-space:nowrap}
+
+/* ── HERO ── */
+.hero{background:linear-gradient(135deg,#0D47A1 0%,#1A73E8 60%,#42A5F5 100%);color:#fff;padding:44px 24px 32px;text-align:center}
+.hero h1{font-size:26px;font-weight:700;margin-bottom:6px}
+.hero p{font-size:14px;opacity:.88;margin-bottom:16px}
+.hero-search{display:flex;align-items:center;max-width:420px;margin:0 auto;background:#fff;border-radius:24px;padding:6px 16px;gap:8px;box-shadow:0 2px 8px rgba(0,0,0,0.2)}
+.hero-search svg{width:18px;height:18px;fill:#5F6368;flex-shrink:0}
+.hero-search input{border:none;outline:none;width:100%;font-family:'Roboto',sans-serif;font-size:14px;color:#1F2328;background:transparent}
+.hero-search input::placeholder{color:#9AA0A6}
+
+/* ── HOME SCREEN ── */
+.home-screen{max-width:1080px;margin:0 auto;padding:28px 20px 64px}
+.section-label{font-size:11px;font-weight:700;color:#5F6368;letter-spacing:1px;text-transform:uppercase;margin:0 0 14px}
+.card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:860px){.card-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:540px){.card-grid{grid-template-columns:1fr}}
+
+/* ── MATERIAL CARD ── */
+.card{background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.10),0 1px 6px rgba(0,0,0,0.06);cursor:pointer;overflow:hidden;transition:transform .18s,box-shadow .18s;border:1px solid #E8EAED;display:flex;flex-direction:column}
+.card:hover{transform:translateY(-4px);box-shadow:0 6px 20px rgba(0,0,0,0.14)}
+.card-accent{height:5px;background:var(--accent,#1A73E8)}
+.card-body{padding:16px 16px 12px;flex:1}
+.card-icon{font-size:26px;margin-bottom:8px;display:block}
+.card-num{font-size:10px;font-weight:700;color:#9AA0A6;letter-spacing:.8px;text-transform:uppercase;margin-bottom:2px}
+.card-title{font-size:14px;font-weight:700;color:#1F2328;margin-bottom:2px}
+.card-en{font-size:11px;color:#5F6368;margin-bottom:6px}
+.card-desc{font-size:12px;color:#5F6368;line-height:1.5}
+.card-footer{padding:8px 16px 12px;display:flex;align-items:center;justify-content:flex-end;gap:4px;font-size:11.5px;font-weight:500;color:var(--accent,#1A73E8)}
+.card-footer svg{width:14px;height:14px;fill:var(--accent,#1A73E8)}
+
+/* Quiz card special */
+.card-quiz{background:linear-gradient(135deg,#1A73E8,#8B5CF6)!important;color:#fff}
+.card-quiz .card-title,.card-quiz .card-en,.card-quiz .card-desc,.card-quiz .card-num{color:#fff!important}
+.card-quiz .card-footer{color:#fff}
+.card-quiz .card-footer svg{fill:#fff}
+
+/* ── DETAIL SCREEN ── */
+.detail-screen{display:none;max-width:860px;margin:0 auto;padding:24px 20px 72px;animation:fadeIn .22s ease}
+.detail-screen.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.detail-header{border-radius:12px;padding:20px 26px;display:flex;align-items:center;gap:14px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,0.08);background:var(--hbg,#E8F0FE);border-bottom:2px solid var(--accent,#1A73E8)}
+.detail-icon{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5em;flex-shrink:0;background:var(--accent,#1A73E8);color:#fff}
+.detail-header h2{font-size:19px;font-weight:700;color:var(--txt,#0D47A1)}
+.detail-subtitle{font-size:12px;color:#5F6368;margin-top:2px}
+.section-card{background:#fff;border:1px solid #E8EAED;border-radius:12px;margin-bottom:20px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.07)}
+.section-card-body{padding:20px 22px}
+.diagram-wrap{text-align:center;margin:0 0 18px}
+.diagram-wrap svg{max-width:100%;border-radius:8px}
+.diagram-caption{font-size:12px;color:#5F6368;margin-top:5px;font-style:italic}
+.section-card-body h3{font-size:13px;font-weight:700;color:#0D47A1;margin:20px 0 7px;border-left:3px solid #1A73E8;padding-left:10px}
+.section-card-body h3:first-child{margin-top:0}
+.section-card-body h4{font-size:12px;font-weight:700;color:#3C4043;margin:10px 0 4px}
+.section-card-body p{margin-bottom:10px;font-size:13.5px}
+.section-card-body ul,.section-card-body ol{padding-left:20px;margin-bottom:10px}
+.section-card-body li{margin-bottom:3px;font-size:13.5px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.info-box{background:#F8F9FA;border:1px solid #E8EAED;border-radius:8px;padding:12px 14px}
+.info-box h4{color:#1A73E8;margin-top:0}
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin:10px 0}
+th{background:#E8F0FE;color:#0D47A1;text-align:left;padding:7px 11px;border:1px solid #DADCE0;font-weight:700}
+td{padding:6px 11px;border:1px solid #DADCE0;vertical-align:top}
+tr:nth-child(even) td{background:#F8F9FA}
+tr:hover td{background:#EEF2FF}
+.key-fact{background:#E8F0FE;border-left:4px solid #1A73E8;border-radius:0 8px 8px 0;padding:10px 13px;margin:12px 0;font-size:13px}
+.key-fact strong{color:#0D47A1}
+
+/* ── QUIZ BLOCK ── */
+.quiz-section{background:linear-gradient(135deg,#EEF2FF,#F5F3FF);border:2px solid #818CF8;border-radius:14px;padding:22px 22px 18px;margin-top:24px}
+.quiz-section-title{font-size:15px;font-weight:700;color:#4338CA;margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.quiz-section-title svg{width:20px;height:20px;fill:#4338CA;flex-shrink:0}
+.quiz-q{background:#fff;border:1px solid #C7D2FE;border-radius:10px;padding:16px 18px;margin-bottom:14px}
+.quiz-q-text{font-size:13.5px;font-weight:600;color:#1E1B4B;margin-bottom:12px}
+.quiz-q-num{font-size:10px;font-weight:700;color:#818CF8;letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px}
+.quiz-options{display:flex;flex-direction:column;gap:7px}
+.quiz-opt{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 14px;border-radius:8px;cursor:pointer;
+  border:1.5px solid #E0E7FF;background:#F5F3FF;
+  font-size:13px;color:#374151;
+  transition:all .15s;user-select:none;
+}
+.quiz-opt:hover{border-color:#818CF8;background:#EEF2FF}
+.quiz-opt.correct{background:#D1FAE5;border-color:#059669;color:#064E3B;font-weight:600}
+.quiz-opt.wrong{background:#FEE2E2;border-color:#DC2626;color:#7F1D1D}
+.quiz-opt.disabled{pointer-events:none}
+.quiz-opt-marker{width:22px;height:22px;border-radius:50%;border:2px solid #C7D2FE;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#818CF8;flex-shrink:0;background:#fff}
+.quiz-opt.correct .quiz-opt-marker{background:#059669;border-color:#059669;color:#fff}
+.quiz-opt.wrong .quiz-opt-marker{background:#DC2626;border-color:#DC2626;color:#fff}
+.quiz-feedback{margin-top:10px;font-size:12.5px;border-radius:6px;padding:8px 12px;display:none}
+.quiz-feedback.show{display:block}
+.quiz-feedback.ok{background:#D1FAE5;color:#065F46}
+.quiz-feedback.fail{background:#FEE2E2;color:#7F1D1D}
+.quiz-score-bar{display:flex;align-items:center;justify-content:space-between;margin-top:18px;padding-top:14px;border-top:1px solid #C7D2FE}
+.quiz-score-text{font-size:13px;font-weight:600;color:#4338CA}
+.quiz-reset-btn{background:#4338CA;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Roboto',sans-serif;transition:background .15s}
+.quiz-reset-btn:hover{background:#3730A3}
+
+/* ── QUIZ MASTER SCREEN ── */
+#quizMasterScreen{display:none;max-width:860px;margin:0 auto;padding:24px 20px 72px;animation:fadeIn .22s ease}
+#quizMasterScreen.active{display:block}
+.qm-header{background:linear-gradient(135deg,#4338CA,#7C3AED);border-radius:14px;padding:28px;color:#fff;margin-bottom:22px;text-align:center}
+.qm-header h2{font-size:22px;font-weight:700;margin-bottom:6px}
+.qm-header p{opacity:.88;font-size:14px}
+.qm-progress{background:rgba(255,255,255,0.2);border-radius:8px;height:8px;margin:14px 0 4px}
+.qm-progress-fill{background:#fff;border-radius:8px;height:8px;transition:width .4s ease}
+.qm-progress-label{font-size:12px;opacity:.8}
+.qm-card{background:#fff;border:1px solid #E8EAED;border-radius:12px;padding:24px;margin-bottom:20px;box-shadow:0 1px 6px rgba(0,0,0,0.07)}
+.qm-sys-tag{display:inline-block;background:#EEF2FF;color:#4338CA;border-radius:12px;padding:2px 10px;font-size:11px;font-weight:700;margin-bottom:10px}
+.qm-q-text{font-size:15px;font-weight:700;color:#1E1B4B;margin-bottom:14px;line-height:1.5}
+.qm-options{display:flex;flex-direction:column;gap:9px}
+.qm-opt{display:flex;align-items:center;gap:12px;padding:11px 16px;border-radius:10px;cursor:pointer;border:2px solid #E0E7FF;background:#F8F9FA;font-size:13.5px;color:#374151;transition:all .15s;user-select:none}
+.qm-opt:hover{border-color:#818CF8;background:#EEF2FF}
+.qm-opt.correct{background:#D1FAE5;border-color:#059669;color:#064E3B;font-weight:600}
+.qm-opt.wrong{background:#FEE2E2;border-color:#DC2626;color:#7F1D1D}
+.qm-opt.disabled{pointer-events:none}
+.qm-opt-letter{width:28px;height:28px;border-radius:50%;border:2px solid #C7D2FE;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#818CF8;flex-shrink:0;background:#fff}
+.qm-opt.correct .qm-opt-letter{background:#059669;border-color:#059669;color:#fff}
+.qm-opt.wrong .qm-opt-letter{background:#DC2626;border-color:#DC2626;color:#fff}
+.qm-feedback{margin-top:12px;padding:10px 14px;border-radius:8px;font-size:13px;display:none}
+.qm-feedback.show{display:block}
+.qm-feedback.ok{background:#D1FAE5;color:#065F46}
+.qm-feedback.fail{background:#FEE2E2;color:#7F1D1D}
+.qm-nav{display:flex;align-items:center;justify-content:space-between;margin-top:16px}
+.qm-btn{background:#4338CA;color:#fff;border:none;border-radius:10px;padding:10px 24px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:'Roboto',sans-serif;transition:background .15s}
+.qm-btn:hover{background:#3730A3}
+.qm-btn:disabled{background:#C7D2FE;cursor:default}
+.qm-result{background:linear-gradient(135deg,#4338CA,#7C3AED);color:#fff;border-radius:14px;padding:36px;text-align:center}
+.qm-result h3{font-size:24px;font-weight:700;margin-bottom:8px}
+.qm-result .score-big{font-size:56px;font-weight:700;margin:16px 0}
+.qm-result p{opacity:.88;font-size:15px;margin-bottom:20px}
+.qm-result .qm-btn{background:#fff;color:#4338CA}
+.qm-result .qm-btn:hover{background:#EEF2FF}
+
+/* ── COLOUR TOKENS ── */
+.c1{--accent:#F59E0B;--hbg:#FEF3C7;--txt:#92400E}
+.c2{--accent:#7C3AED;--hbg:#EDE9FE;--txt:#4C1D95}
+.c3{--accent:#DB2777;--hbg:#FCE7F3;--txt:#831843}
+.c4{--accent:#2563EB;--hbg:#DBEAFE;--txt:#1E3A8A}
+.c5{--accent:#059669;--hbg:#D1FAE5;--txt:#064E3B}
+.c6{--accent:#DC2626;--hbg:#FEE2E2;--txt:#7F1D1D}
+.c7{--accent:#0284C7;--hbg:#E0F2FE;--txt:#0C4A6E}
+.c8{--accent:#16A34A;--hbg:#DCFCE7;--txt:#14532D}
+.c9{--accent:#EA580C;--hbg:#FFEDD5;--txt:#7C2D12}
+.c10{--accent:#6D28D9;--hbg:#EDE9FE;--txt:#3B0764}
+.c11{--accent:#9D174D;--hbg:#FCE7F3;--txt:#500724}
+
+/* ── PRINT ── */
+@media print{.app-bar,.home-screen,#quizMasterScreen,footer{display:none!important}.detail-screen.active{display:block!important;padding:0}}
+</style>
+</head>
+<body>
+
+<!-- APP BAR -->
+<header class="app-bar" id="appBar">
+  <div class="app-bar-logo">A&amp;F</div>
+  <span class="app-bar-title" id="appBarTitle">Anatomi &amp; Fisiologi</span>
+  <button class="app-bar-back" id="backBtn" onclick="showHome()">
+    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    Kembali
+  </button>
+  <div class="app-bar-chips" id="appBarChips">
+    <span class="chip">11 Sistem</span>
+    <span class="chip">Quiz &amp; Nota</span>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════
+     HOME SCREEN
+════════════════════════════════════════════ -->
+<div id="homeView">
+  <div class="hero">
+    <h1>📚 Anatomi &amp; Fisiologi</h1>
+    <p>Nota Lengkap + Kuiz Interaktif — Klik kad untuk buka nota &amp; latihan soalan</p>
+    <div class="hero-search">
+      <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+      <input type="search" id="searchInput" placeholder="Cari sistem… (saraf, darah, otot…)" oninput="filterCards(this.value)">
+    </div>
+  </div>
+
+  <div class="home-screen">
+    <p class="section-label">Pilih Sistem Tubuh</p>
+    <div class="card-grid" id="cardGrid">
+
+      <div class="card c1" data-name="integumen kulit" onclick="showDetail('d1','1. Sistem Integumen / Kulit')">
+        <div class="card-accent"></div><div class="card-body">
+        <span class="card-icon">🧴</span><div class="card-num">Sistem 01</div>
+        <div class="card-title">Sistem Integumen / Kulit</div><div class="card-en">Integumentary System</div>
+        <div class="card-desc">Kulit, rambut, kuku. Perlindungan, termoregulasi &amp; sintesis Vit D.</div></div>
+        <div class="card-footer">Nota + Kuiz <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></div>
+      </div>
+
+      <div class="card c2" data-name="skeletal rangka tulang" onclick="showDetail('d2','2. Sistem Skeletal / Rangka')">
+        <div class="card-accent"></div><div class="card-body">
+        <span class="card-icon">🦴</span><div class="card-num">Sistem 02</div>
+        <div class="card-title">Sistem Skeletal / Rangka</div><div class="card-en">Skeletal System</div>
+        <div class="card-desc">206 tulang. Sokongan, perlindungan &amp; hematopoiesis.</div></div>
+        <div class="card-footer">Nota + Kuiz <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></div>
+      </div>
+
+      <div class="card c3" data-name="otot muscle" onclick="showDetail('d3','3. Sistem Otot')">
+        <div class="card-accent"></div><div class="card-body">
+        <span class="card-icon">💪</span><div class="card-num">Sistem 03</div>
+        <div class="card-title">Sistem Otot</div><div class="card-en">Muscular System</div>
+        <div class="card-desc">Otot rangka, jantung &amp; licin. Teori gelongsor filamen myosin-aktin.</div></div>
+        <div class="card-footer">Nota + Kuiz <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></div>
+      </div>
+
+      <div class="card c4" data-name="saraf otak neuron brain" onclick="showDetail('d4','4. Sistem Saraf')">
+        <div class="card-accent"></div><div class="card-body">
+        <span class="card-icon">🧠</span><div class="card-num">Sistem 04</div>
+        <div class="card-title">Sistem Saraf</div><div class="card-en">Nervous System</div>
+        <div class="card-desc">SSP &amp; periferi. Neuron, mielin, Ranvier. Otak &amp; saraf tunjang.</div></div>
+        <div class="card-footer">Nota + Kuiz <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></div>
+      </div>
+
+      <div class="card c5" data-name="endokrin hormon kelenjar" onclick="showDetail('d5','5. Sistem Endokrin')">
+        <div class="card-accent"></div><div class="card-body">
+        <span class="card-icon">⚗️</span><div class="card-num">Sistem 05</div>
+        <div class="card-title">Sistem Endokrin</div><div class="card-en">Endocrine System</div>
+        <div class="card-desc">Pituitari, tiroid, adrenal, pankreas. Hormon &amp; negative feedback.</div></div>
+        <div class="card-footer">Nota + Kuiz <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></div>
+      </div>
+
+      <div class="card c6" data-name="darah jantung peredaran heart blood" onclick="showDetail('d6','6. Darah &amp; Peredaran Darah')">
+        <div class="card-accent"></div><div class="card-body">
+        <span class="card-icon">❤️</span><div class="card-num">Sistem 06</div>
+        <div class="card-title">Darah &amp; Peredaran Darah</div><div class="card-en">Cardiovascular System</div>
+        <div class="card-desc">Jantung 4 ruang. RBC, WBC, platelet. Kumpulan darah ABO.</div></div>
+        <div class="card-footer">Nota + Kuiz <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></div>
+      </div>
+
+      <div class="card c7" data-name="limfatik imuniti limpa lymph" onclick="showDetail('d7','7. Sistem Limfatik')">
+        <div class="card-accent"></div><div class="card-body">
+        <span class="card-icon">🛡️</span><div class="card-num">Sistem 07</div>
+        <div class="card-title">Sistem Limfatik</div><div class="card-en">Lymphatic System</div>
+        <div class="card-desc">~600 nod limfa. Limpa, timus. Imuniti bawaan &amp; adaptif.</div></div>
+        <div class="card-footer">Nota + Kuiz <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></div>
+      </div>
+
+      <div class="card c8" data-name="pernafasan paru lung respiratory" onclick="showDetail('d8','8. Sistem Pernafasan')">
+        <div class="card-accent"></div><div class="card-body">
+        <span class="card-icon">🫁</span><div class="card-num">Sistem 08</div>
+        <div class="card-title">Sistem Pernafasan</div><div class="card-en">Respiratory System</div>
+        <div class="card-desc">Trakea, bronkus, alveolus. Pertukaran O₂/CO₂ &amp; diafragma.</div></div>
+        <div class="card-footer">Nota + Kuiz <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></div>
+      </div>
+
+      <div class="card c9" data-name="penghadaman usus perut digestive" onclick="showDetail('d9','9. Sistem Penghadaman')">
+        <div class="card-accent"></div><div class="card-body">
+        <span class="card-icon">🫄</span><div class="card-num">Sistem 09</div>
+        <div class="card-title">Sistem Penghadaman</div><div class="card-en">Digestive System</div>
+        <div class="card-desc">Mulut → usus. Hati, pundi hempedu &amp; enzim pencernaan.</div></div>
+        <div class="card-footer">Nota + Kuiz <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></div>
+      </div>
+
+      <div class="card c10" data-name="urinari ginjal kidney urine" onclick="showDetail('d10','10. Sistem Urinari')">
+        <div class="card-accent"></div><div class="card-body">
+        <span class="card-icon">🫘</span><div class="card-num">Sistem 10</div>
+        <div class="card-title">Sistem Urinari</div><div class="card-en">Urinary System</div>
+        <div class="card-desc">Ginjal, ureter, pundi kencing. 1 juta nefron/ginjal.</div></div>
+        <div class="card-footer">Nota + Kuiz <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></div>
+      </div>
+
+      <div class="card c11" data-name="reproduktif ovari testis reproductive" onclick="showDetail('d11','11. Sistem Reproduktif')">
+        <div class="card-accent"></div><div class="card-body">
+        <span class="card-icon">🔬</span><div class="card-num">Sistem 11</div>
+        <div class="card-title">Sistem Reproduktif</div><div class="card-en">Reproductive System</div>
+        <div class="card-desc">Ovari, uterus, testis. Kitaran haid &amp; gametogenesis.</div></div>
+        <div class="card-footer">Nota + Kuiz <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></div>
+      </div>
+
+      <!-- Quiz Master Card -->
+      <div class="card card-quiz" data-name="kuiz quiz semua" onclick="startQuizMaster()" style="--accent:#4338CA">
+        <div class="card-accent" style="background:rgba(255,255,255,0.4)"></div>
+        <div class="card-body">
+          <span class="card-icon">🎯</span>
+          <div class="card-num" style="color:rgba(255,255,255,0.7)">Kuiz Besar</div>
+          <div class="card-title">Kuiz Semua Sistem</div>
+          <div class="card-en" style="color:rgba(255,255,255,0.75)">Mixed Master Quiz — 33 soalan rawak</div>
+          <div class="card-desc" style="color:rgba(255,255,255,0.82)">Uji pengetahuan anda merentasi kesemua 11 sistem badan manusia dalam satu sesi.</div>
+        </div>
+        <div class="card-footer" style="color:#fff">Mula Kuiz <svg viewBox="0 0 24 24" style="fill:#fff"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     DETAIL SCREENS  (notes + per-system quiz)
+════════════════════════════════════════════ -->
+
+<!-- ─── D1: INTEGUMEN ─── -->
+<div class="detail-screen c1" id="d1">
+  <div class="detail-header"><div class="detail-icon">🧴</div><div><h2>1. Sistem Integumen / Kulit</h2><div class="detail-subtitle">Integumentary System</div></div></div>
+  <div class="section-card"><div class="section-card-body">
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 500 210" xmlns="http://www.w3.org/2000/svg" width="500" height="210">
+        <rect width="500" height="210" fill="#fff8f0" rx="10"/>
+        <rect x="20" y="20" width="460" height="46" fill="#f5c89a" rx="4"/>
+        <text x="36" y="46" font-size="12" font-weight="bold" fill="#7c4d1e">Epidermis</text>
+        <text x="36" y="60" font-size="10" fill="#7c4d1e">Stratum Corneum → Basale</text>
+        <rect x="20" y="68" width="460" height="60" fill="#e8a57a" rx="4"/>
+        <text x="36" y="88" font-size="12" font-weight="bold" fill="#5a2d0c">Dermis</text>
+        <ellipse cx="150" cy="78" rx="7" ry="5" fill="#b8763e"/><line x1="150" y1="83" x2="150" y2="128" stroke="#b8763e" stroke-width="3.5"/><text x="118" y="142" font-size="9" fill="#5a2d0c">Folikel Rambut</text>
+        <path d="M260 78 Q272 105 260 128" stroke="#5b9bd5" stroke-width="2.5" fill="none"/><circle cx="260" cy="78" r="4" fill="#5b9bd5"/><text x="238" y="142" font-size="9" fill="#1a4a7a">Kln. Peluh</text>
+        <ellipse cx="340" cy="100" rx="12" ry="7" fill="#f7e06a"/><text x="320" y="142" font-size="9" fill="#7a6000">Kln. Sebum</text>
+        <path d="M65 115 Q82 107 100 115 Q118 123 136 115" stroke="#e63946" stroke-width="2" fill="none"/><text x="50" y="155" font-size="9" fill="#c0392b">Sal. Darah</text>
+        <rect x="20" y="130" width="460" height="50" fill="#f2d9bb" rx="4"/>
+        <text x="36" y="154" font-size="12" font-weight="bold" fill="#6b3d14">Hypodermis (Tisu Adipos)</text>
+        <circle cx="185" cy="163" r="9" fill="#f9c74f" opacity="0.7"/><circle cx="210" cy="168" r="8" fill="#f9c74f" opacity="0.7"/><circle cx="238" cy="160" r="10" fill="#f9c74f" opacity="0.7"/><circle cx="268" cy="165" r="8" fill="#f9c74f" opacity="0.7"/>
+        <path d="M410 120 Q419 112 428 120 Q437 128 428 132" stroke="#9b59b6" stroke-width="2" fill="none"/><text x="390" y="155" font-size="9" fill="#6c3483">Reseptor Saraf</text>
+      </svg>
+      <div class="diagram-caption">Rajah 1.1 — Struktur Lapisan Kulit Manusia</div>
+    </div>
+    <h3>Definisi &amp; Fungsi</h3>
+    <p>Sistem integumen merupakan organ terbesar badan manusia (~<strong>4–5 kg</strong>, permukaan <strong>1.5–2 m²</strong>). Meliputi kulit, rambut, kuku dan kelenjar berkaitan.</p>
+    <div class="two-col">
+      <div class="info-box"><h4>Fungsi Utama</h4><ul><li>Perlindungan fizik &amp; kimia</li><li>Pengaturan suhu badan</li><li>Sensasi (sentuhan, sakit, haba)</li><li>Sintesis Vitamin D</li><li>Ekskresi melalui peluh</li></ul></div>
+      <div class="info-box"><h4>Lapisan Kulit</h4><ul><li><strong>Epidermis:</strong> Corneum→Basale (sel, melanosit)</li><li><strong>Dermis:</strong> kolagen, elastin, saluran darah</li><li><strong>Hypodermis:</strong> tisu lemak (adiposit), penebat haba</li></ul></div>
+    </div>
+    <div class="key-fact"><strong>📌</strong> Melanosit di stratum basale menghasilkan melanin yang melindungi DNA daripada sinaran UV.</div>
+    <!-- QUIZ -->
+    <div class="quiz-section" id="quiz-d1">
+      <div class="quiz-section-title"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>Kuiz: Sistem Integumen</div>
+      <div id="qs-d1"></div>
+      <div class="quiz-score-bar"><span class="quiz-score-text" id="score-d1">Skor: 0 / 0</span><button class="quiz-reset-btn" onclick="resetQuiz('d1')">🔄 Cuba Semula</button></div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ─── D2: SKELETAL ─── -->
+<div class="detail-screen c2" id="d2">
+  <div class="detail-header"><div class="detail-icon">🦴</div><div><h2>2. Sistem Skeletal / Rangka</h2><div class="detail-subtitle">Skeletal System</div></div></div>
+  <div class="section-card"><div class="section-card-body">
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 500 280" xmlns="http://www.w3.org/2000/svg" width="500" height="280">
+        <rect width="500" height="280" fill="#f5f3ff" rx="10"/>
+        <ellipse cx="250" cy="42" rx="38" ry="34" fill="#e9d5a1" stroke="#9b7a3e" stroke-width="2"/>
+        <ellipse cx="250" cy="53" rx="20" ry="12" fill="#d4b483" stroke="#9b7a3e" stroke-width="1"/>
+        <rect x="243" y="76" width="14" height="108" fill="#e9d5a1" rx="3" stroke="#9b7a3e" stroke-width="1.5"/>
+        <line x1="243" y1="88" x2="257" y2="88" stroke="#9b7a3e" stroke-width="1"/><line x1="243" y1="102" x2="257" y2="102" stroke="#9b7a3e" stroke-width="1"/><line x1="243" y1="116" x2="257" y2="116" stroke="#9b7a3e" stroke-width="1"/><line x1="243" y1="130" x2="257" y2="130" stroke="#9b7a3e" stroke-width="1"/><line x1="243" y1="144" x2="257" y2="144" stroke="#9b7a3e" stroke-width="1"/><line x1="243" y1="158" x2="257" y2="158" stroke="#9b7a3e" stroke-width="1"/>
+        <path d="M250 88 Q212 97 208 124 Q212 133 250 128" stroke="#9b7a3e" stroke-width="2.5" fill="none"/>
+        <path d="M250 88 Q288 97 292 124 Q288 133 250 128" stroke="#9b7a3e" stroke-width="2.5" fill="none"/>
+        <path d="M230 184 Q202 195 206 222 Q228 232 250 230 Q272 232 294 222 Q298 195 270 184 Z" fill="#e9d5a1" stroke="#9b7a3e" stroke-width="2"/>
+        <rect x="188" y="83" width="12" height="70" fill="#e9d5a1" rx="4" stroke="#9b7a3e" stroke-width="1.5" transform="rotate(-10,194,118)"/>
+        <rect x="176" y="150" width="11" height="58" fill="#e9d5a1" rx="4" stroke="#9b7a3e" stroke-width="1.5" transform="rotate(5,181,179)"/>
+        <rect x="300" y="83" width="12" height="70" fill="#e9d5a1" rx="4" stroke="#9b7a3e" stroke-width="1.5" transform="rotate(10,306,118)"/>
+        <rect x="313" y="150" width="11" height="58" fill="#e9d5a1" rx="4" stroke="#9b7a3e" stroke-width="1.5" transform="rotate(-5,318,179)"/>
+        <rect x="222" y="230" width="16" height="76" fill="#e9d5a1" rx="4" stroke="#9b7a3e" stroke-width="1.5" transform="rotate(-3,230,268)"/>
+        <rect x="262" y="230" width="16" height="76" fill="#e9d5a1" rx="4" stroke="#9b7a3e" stroke-width="1.5" transform="rotate(3,270,268)"/>
+        <text x="295" y="44" font-size="10" fill="#4b3a1a" font-weight="bold">Tengkorak</text>
+        <text x="295" y="122" font-size="10" fill="#4b3a1a">Tulang Rusuk</text>
+        <text x="295" y="212" font-size="10" fill="#4b3a1a">Pelvis</text>
+        <line x1="293" y1="44" x2="282" y2="44" stroke="#4b3a1a" stroke-width="0.8"/>
+        <line x1="293" y1="122" x2="284" y2="118" stroke="#4b3a1a" stroke-width="0.8"/>
+        <line x1="293" y1="210" x2="280" y2="207" stroke="#4b3a1a" stroke-width="0.8"/>
+      </svg>
+      <div class="diagram-caption">Rajah 2.1 — Rangka Manusia (206 Tulang)</div>
+    </div>
+    <h3>Pembahagian Rangka</h3>
+    <div class="two-col">
+      <div class="info-box"><h4>Rangka Aksial (80 tulang)</h4><ul><li>Tengkorak (22)</li><li>Vertebra tulang belakang (26)</li><li>Rusuk &amp; sternum (25)</li><li>Tulang hyoid (1)</li></ul></div>
+      <div class="info-box"><h4>Rangka Apendikular (126 tulang)</h4><ul><li>Gelang bahu &amp; lengan atas</li><li>Lengan bawah &amp; tangan</li><li>Gelang pinggul (pelvis)</li><li>Paha, kaki &amp; tapak kaki</li></ul></div>
+    </div>
+    <h3>Jenis Tulang</h3>
+    <table><tr><th>Jenis</th><th>Contoh</th><th>Ciri</th></tr><tr><td>Panjang</td><td>Femur, humerus</td><td>Diafisis, epifisis, sumsum kuning</td></tr><tr><td>Pendek</td><td>Karpal, tarsal</td><td>Spongi, hampir kiub</td></tr><tr><td>Pipih</td><td>Sternum, parietal</td><td>Melindungi organ, sumsum merah</td></tr><tr><td>Tak Sekata</td><td>Vertebra</td><td>Bentuk kompleks</td></tr><tr><td>Sesamoid</td><td>Patela</td><td>Dalam tendo</td></tr></table>
+    <div class="key-fact"><strong>📌</strong> Tulang mengalami remodelling oleh <strong>osteoblas</strong> (pembina) dan <strong>osteoklast</strong> (pemecah) secara berterusan.</div>
+    <div class="quiz-section" id="quiz-d2"><div class="quiz-section-title"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>Kuiz: Sistem Skeletal</div><div id="qs-d2"></div><div class="quiz-score-bar"><span class="quiz-score-text" id="score-d2">Skor: 0 / 0</span><button class="quiz-reset-btn" onclick="resetQuiz('d2')">🔄 Cuba Semula</button></div></div>
+  </div></div>
+</div>
+
+<!-- ─── D3: OTOT ─── -->
+<div class="detail-screen c3" id="d3">
+  <div class="detail-header"><div class="detail-icon">💪</div><div><h2>3. Sistem Otot</h2><div class="detail-subtitle">Muscular System</div></div></div>
+  <div class="section-card"><div class="section-card-body">
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 500 185" xmlns="http://www.w3.org/2000/svg" width="500" height="185">
+        <rect width="500" height="185" fill="#fdf2f8" rx="10"/>
+        <text x="16" y="24" font-size="11" font-weight="bold" fill="#9d174d">A. Otot Rangka</text>
+        <rect x="16" y="30" width="130" height="28" rx="5" fill="#f9a8d4" stroke="#9d174d" stroke-width="1.5"/>
+        <line x1="26" y1="30" x2="26" y2="58" stroke="#9d174d" stroke-width="0.7"/><line x1="40" y1="30" x2="40" y2="58" stroke="#9d174d" stroke-width="0.7"/><line x1="54" y1="30" x2="54" y2="58" stroke="#9d174d" stroke-width="0.7"/><line x1="68" y1="30" x2="68" y2="58" stroke="#9d174d" stroke-width="0.7"/><line x1="82" y1="30" x2="82" y2="58" stroke="#9d174d" stroke-width="0.7"/><line x1="96" y1="30" x2="96" y2="58" stroke="#9d174d" stroke-width="0.7"/><line x1="110" y1="30" x2="110" y2="58" stroke="#9d174d" stroke-width="0.7"/><line x1="124" y1="30" x2="124" y2="58" stroke="#9d174d" stroke-width="0.7"/>
+        <text x="22" y="76" font-size="9.5" fill="#9d174d">Bergaris (Voluntary)</text>
+        <text x="175" y="24" font-size="11" font-weight="bold" fill="#7c3aed">B. Otot Jantung</text>
+        <path d="M175 35 Q188 31 200 40 Q214 50 228 40 Q242 31 256 40 Q270 50 284 40 Q296 31 308 40" stroke="#7c3aed" stroke-width="2.5" fill="none"/>
+        <path d="M175 50 Q188 46 200 55 Q214 64 228 55 Q242 46 256 55 Q270 64 284 55 Q296 46 308 55" stroke="#7c3aed" stroke-width="2.5" fill="none"/>
+        <text x="182" y="76" font-size="9.5" fill="#7c3aed">Bergaris, Involuntary</text>
+        <text x="340" y="24" font-size="11" font-weight="bold" fill="#0284c7">C. Otot Licin</text>
+        <ellipse cx="352" cy="46" rx="7" ry="16" fill="#bae6fd" stroke="#0284c7" stroke-width="1.5"/><ellipse cx="368" cy="46" rx="7" ry="16" fill="#bae6fd" stroke="#0284c7" stroke-width="1.5"/><ellipse cx="384" cy="46" rx="7" ry="16" fill="#bae6fd" stroke="#0284c7" stroke-width="1.5"/><ellipse cx="400" cy="46" rx="7" ry="16" fill="#bae6fd" stroke="#0284c7" stroke-width="1.5"/><ellipse cx="416" cy="46" rx="7" ry="16" fill="#bae6fd" stroke="#0284c7" stroke-width="1.5"/><ellipse cx="432" cy="46" rx="7" ry="16" fill="#bae6fd" stroke="#0284c7" stroke-width="1.5"/><ellipse cx="448" cy="46" rx="7" ry="16" fill="#bae6fd" stroke="#0284c7" stroke-width="1.5"/>
+        <text x="348" y="76" font-size="9.5" fill="#0284c7">Tidak Bergaris, Involuntary</text>
+        <text x="16" y="105" font-size="11" font-weight="bold" fill="#9d174d">Sarkomer — Unit Kontraktil</text>
+        <rect x="16" y="112" width="468" height="38" fill="#fff" stroke="#ccc" rx="4"/>
+        <line x1="16" y1="112" x2="16" y2="150" stroke="#333" stroke-width="2.5"/><line x1="250" y1="112" x2="250" y2="150" stroke="#333" stroke-width="2.5"/><line x1="484" y1="112" x2="484" y2="150" stroke="#333" stroke-width="2.5"/>
+        <rect x="96" y="122" width="262" height="9" rx="3" fill="#e63946"/>
+        <text x="192" y="170" font-size="9.5" fill="#e63946">Myosin (filamen tebal)</text>
+        <rect x="16" y="117" width="138" height="6" rx="2" fill="#457b9d" opacity="0.85"/><rect x="346" y="117" width="138" height="6" rx="2" fill="#457b9d" opacity="0.85"/><rect x="16" y="140" width="138" height="6" rx="2" fill="#457b9d" opacity="0.85"/><rect x="346" y="140" width="138" height="6" rx="2" fill="#457b9d" opacity="0.85"/>
+        <text x="36" y="170" font-size="9.5" fill="#457b9d">Aktin (filamen nipis)</text>
+        <text x="370" y="170" font-size="9.5" fill="#555">← Satu Sarkomer →</text>
+      </svg>
+      <div class="diagram-caption">Rajah 3.1 — Tiga Jenis Otot &amp; Struktur Sarkomer</div>
+    </div>
+    <h3>Tiga Jenis Otot</h3>
+    <table><tr><th>Jenis</th><th>Kawalan</th><th>Lokasi</th><th>Histologi</th></tr><tr><td>Rangka</td><td>Sukarela</td><td>Melekat pada tulang</td><td>Bergaris, multinukleus</td></tr><tr><td>Jantung</td><td>Tidak sukarela</td><td>Dinding jantung</td><td>Bergaris, disk interkalated</td></tr><tr><td>Licin</td><td>Tidak sukarela</td><td>Organ dalaman, sal. darah</td><td>Tidak bergaris, 1 nukleus</td></tr></table>
+    <h3>Mekanisme Kontraksi (Teori Gelongsor Filamen)</h3>
+    <ol><li>Impuls saraf → persimpangan neuromuskular (NMJ)</li><li>ACh dibebaskan → depolarisasi sarcolemma</li><li>Ca²⁺ dibebaskan dari retikulum sarkoplasma</li><li>Ca²⁺ + troponin → dedah tapak aktif aktin</li><li>Kepala myosin terikat aktin → power stroke</li><li>ATP bebaskan kepala myosin → kitaran berulang</li></ol>
+    <div class="key-fact"><strong>📌</strong> Kontraksi memerlukan ATP &amp; Ca²⁺. Rigor mortis berlaku apabila ATP habis selepas kematian.</div>
+    <div class="quiz-section" id="quiz-d3"><div class="quiz-section-title"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>Kuiz: Sistem Otot</div><div id="qs-d3"></div><div class="quiz-score-bar"><span class="quiz-score-text" id="score-d3">Skor: 0 / 0</span><button class="quiz-reset-btn" onclick="resetQuiz('d3')">🔄 Cuba Semula</button></div></div>
+  </div></div>
+</div>
+
+<!-- ─── D4: SARAF ─── -->
+<div class="detail-screen c4" id="d4">
+  <div class="detail-header"><div class="detail-icon">🧠</div><div><h2>4. Sistem Saraf</h2><div class="detail-subtitle">Nervous System</div></div></div>
+  <div class="section-card"><div class="section-card-body">
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 500 200" xmlns="http://www.w3.org/2000/svg" width="500" height="200">
+        <rect width="500" height="200" fill="#eff6ff" rx="10"/>
+        <circle cx="110" cy="100" r="32" fill="#93c5fd" stroke="#2563eb" stroke-width="2"/>
+        <circle cx="110" cy="100" r="11" fill="#1d4ed8"/>
+        <text x="100" y="104" font-size="9" fill="#fff" font-weight="bold">Nukleus</text>
+        <text x="80" y="148" font-size="10" fill="#1e40af" font-weight="bold">Badan Sel</text>
+        <path d="M87 78 Q65 55 45 50" stroke="#2563eb" stroke-width="2" fill="none"/><path d="M80 88 Q55 68 35 73" stroke="#2563eb" stroke-width="2" fill="none"/><path d="M80 100 Q50 96 25 94" stroke="#2563eb" stroke-width="2" fill="none"/><path d="M87 114 Q65 128 50 138" stroke="#2563eb" stroke-width="2" fill="none"/>
+        <text x="10" y="86" font-size="10" fill="#1e40af" font-weight="bold">Dendrit</text>
+        <line x1="142" y1="100" x2="450" y2="100" stroke="#2563eb" stroke-width="3"/>
+        <rect x="158" y="93" width="32" height="14" rx="7" fill="#fbbf24" stroke="#d97706" stroke-width="1.5"/><rect x="204" y="93" width="32" height="14" rx="7" fill="#fbbf24" stroke="#d97706" stroke-width="1.5"/><rect x="250" y="93" width="32" height="14" rx="7" fill="#fbbf24" stroke="#d97706" stroke-width="1.5"/><rect x="296" y="93" width="32" height="14" rx="7" fill="#fbbf24" stroke="#d97706" stroke-width="1.5"/><rect x="342" y="93" width="32" height="14" rx="7" fill="#fbbf24" stroke="#d97706" stroke-width="1.5"/><rect x="388" y="93" width="32" height="14" rx="7" fill="#fbbf24" stroke="#d97706" stroke-width="1.5"/>
+        <text x="190" y="84" font-size="9" fill="#92400e">Sarung Mielin</text>
+        <text x="200" y="124" font-size="9" fill="#1e40af">Nod Ranvier</text>
+        <circle cx="458" cy="100" r="9" fill="#2563eb"/><circle cx="472" cy="91" r="5" fill="#93c5fd" stroke="#2563eb"/><circle cx="472" cy="109" r="5" fill="#93c5fd" stroke="#2563eb"/>
+        <text x="440" y="132" font-size="9" fill="#1e40af">Terminal</text>
+        <text x="148" y="165" font-size="10" fill="#1e40af" font-weight="bold">Bahagian Otak:</text>
+        <rect x="230" y="158" width="60" height="18" rx="4" fill="#93c5fd" stroke="#2563eb"/><text x="239" y="170" font-size="9" fill="#1e40af">Serebrum</text>
+        <rect x="298" y="158" width="65" height="18" rx="4" fill="#bfdbfe" stroke="#2563eb"/><text x="306" y="170" font-size="9" fill="#1e40af">Serebellum</text>
+        <rect x="370" y="158" width="70" height="18" rx="4" fill="#dbeafe" stroke="#2563eb"/><text x="377" y="170" font-size="9" fill="#1e40af">Batang Otak</text>
+      </svg>
+      <div class="diagram-caption">Rajah 4.1 — Struktur Neuron &amp; Bahagian Otak</div>
+    </div>
+    <div class="two-col">
+      <div class="info-box"><h4>SSP — Sistem Saraf Pusat</h4><ul><li>Otak: Serebrum, serebellum, batang otak, diensefalon</li><li>Saraf Tunjang: refleks, laluan impuls</li></ul></div>
+      <div class="info-box"><h4>SSP — Sistem Saraf Periferi</h4><ul><li>Somatik (sukarela)</li><li>Autonomik: Simpatik (fight-or-flight) &amp; Parasimpatik (rest-and-digest)</li></ul></div>
+    </div>
+    <h3>Fungsi Bahagian Otak</h3>
+    <table><tr><th>Bahagian</th><th>Fungsi</th></tr><tr><td>Serebrum</td><td>Pemikiran, ingatan, bahasa, gerakan sukarela</td></tr><tr><td>Serebellum</td><td>Keseimbangan, koordinasi pergerakan</td></tr><tr><td>Batang Otak</td><td>Pernafasan, degupan jantung, tekanan darah</td></tr><tr><td>Hipotalamus</td><td>Suhu, lapar, dahaga, hormon, emosi</td></tr></table>
+    <div class="key-fact"><strong>📌</strong> Impuls saraf bermielin bergerak pada kelajuan hingga <strong>120 m/s</strong> melalui konduksi saltatori di nod Ranvier.</div>
+    <div class="quiz-section" id="quiz-d4"><div class="quiz-section-title"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>Kuiz: Sistem Saraf</div><div id="qs-d4"></div><div class="quiz-score-bar"><span class="quiz-score-text" id="score-d4">Skor: 0 / 0</span><button class="quiz-reset-btn" onclick="resetQuiz('d4')">🔄 Cuba Semula</button></div></div>
+  </div></div>
+</div>
+
+<!-- ─── D5–D11 headers only (content condensed for brevity, full quizzes rendered by JS) ─── -->
+<div class="detail-screen c5" id="d5">
+  <div class="detail-header"><div class="detail-icon">⚗️</div><div><h2>5. Sistem Endokrin</h2><div class="detail-subtitle">Endocrine System</div></div></div>
+  <div class="section-card"><div class="section-card-body">
+    <h3>Kelenjar &amp; Hormon Utama</h3>
+    <table><tr><th>Kelenjar</th><th>Hormon</th><th>Fungsi</th></tr><tr><td>Hipotalamus</td><td>CRH, TRH, GnRH</td><td>Kawal pituitari</td></tr><tr><td>Pituitari Anterior</td><td>GH, TSH, ACTH, FSH, LH</td><td>Kawal kelenjar lain &amp; pertumbuhan</td></tr><tr><td>Pituitari Posterior</td><td>ADH, Oksitosin</td><td>Keseimbangan air, kontraksi uterus</td></tr><tr><td>Tiroid</td><td>T3, T4, Kalsitonin</td><td>Metabolisma, kawal kalsium</td></tr><tr><td>Adrenal Korteks</td><td>Kortisol, Aldosteron</td><td>Stres, Na⁺ &amp; K⁺</td></tr><tr><td>Adrenal Medula</td><td>Adrenalin, Noradrenalin</td><td>Fight-or-flight</td></tr><tr><td>Pankreas</td><td>Insulin, Glukagon</td><td>Kawal glukosa darah</td></tr><tr><td>Pineal</td><td>Melatonin</td><td>Kitaran tidur/bangun</td></tr><tr><td>Gonad (Ovari)</td><td>Estrogen, Progesteron</td><td>Ciri seks wanita, haid</td></tr><tr><td>Gonad (Testis)</td><td>Testosteron</td><td>Ciri seks lelaki, sperma</td></tr></table>
+    <div class="key-fact"><strong>📌</strong> Mekanisme maklum balas negatif (negative feedback) mengawal paras hormon — apabila paras tinggi, pengeluaran dihentikan.</div>
+    <div class="quiz-section" id="quiz-d5"><div class="quiz-section-title"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>Kuiz: Sistem Endokrin</div><div id="qs-d5"></div><div class="quiz-score-bar"><span class="quiz-score-text" id="score-d5">Skor: 0 / 0</span><button class="quiz-reset-btn" onclick="resetQuiz('d5')">🔄 Cuba Semula</button></div></div>
+  </div></div>
+</div>
+
+<div class="detail-screen c6" id="d6">
+  <div class="detail-header"><div class="detail-icon">❤️</div><div><h2>6. Darah &amp; Sistem Peredaran Darah</h2><div class="detail-subtitle">Blood &amp; Cardiovascular System</div></div></div>
+  <div class="section-card"><div class="section-card-body">
+    <h3>Komposisi Darah</h3>
+    <table><tr><th>Komponen</th><th>%</th><th>Fungsi</th></tr><tr><td>Plasma</td><td>55%</td><td>Pengangkutan nutrien, hormon, sisa</td></tr><tr><td>Eritrosit (RBC)</td><td>44%</td><td>Angkut O₂ (hemoglobin)</td></tr><tr><td>Leukosit (WBC)</td><td>&lt;1%</td><td>Imuniti</td></tr><tr><td>Trombosit</td><td>&lt;1%</td><td>Pembekuan darah</td></tr></table>
+    <h3>Kumpulan Darah ABO</h3>
+    <table><tr><th>Kumpulan</th><th>Antigen</th><th>Antibodi</th><th>Boleh Terima</th></tr><tr><td>A</td><td>A</td><td>Anti-B</td><td>A, O</td></tr><tr><td>B</td><td>B</td><td>Anti-A</td><td>B, O</td></tr><tr><td>AB</td><td>A &amp; B</td><td>Tiada</td><td>Semua (penerima universal)</td></tr><tr><td>O</td><td>Tiada</td><td>Anti-A &amp; Anti-B</td><td>O sahaja (penderma universal)</td></tr></table>
+    <div class="key-fact"><strong>📌</strong> Jantung berdegup ~<strong>100,000 kali sehari</strong>. Simpul SA adalah perentak semula jadi jantung.</div>
+    <div class="quiz-section" id="quiz-d6"><div class="quiz-section-title"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>Kuiz: Darah &amp; Jantung</div><div id="qs-d6"></div><div class="quiz-score-bar"><span class="quiz-score-text" id="score-d6">Skor: 0 / 0</span><button class="quiz-reset-btn" onclick="resetQuiz('d6')">🔄 Cuba Semula</button></div></div>
+  </div></div>
+</div>
+
+<div class="detail-screen c7" id="d7">
+  <div class="detail-header"><div class="detail-icon">🛡️</div><div><h2>7. Sistem Limfatik</h2><div class="detail-subtitle">Lymphatic System</div></div></div>
+  <div class="section-card"><div class="section-card-body">
+    <h3>Fungsi &amp; Organ Limfoid</h3>
+    <div class="two-col">
+      <div class="info-box"><h4>Fungsi</h4><ul><li>Pengaliran cecair interstisial semula</li><li>Pengangkutan lemak (lakteal)</li><li>Imuniti — tapisan patogen</li></ul></div>
+      <div class="info-box"><h4>Organ Limfoid</h4><ul><li>Nod limfa (~600)</li><li>Limpa</li><li>Timus</li><li>Tonsil</li><li>Sumsum tulang</li></ul></div>
+    </div>
+    <h3>Imuniti</h3>
+    <div class="two-col">
+      <div class="info-box"><h4>Bawaan (Non-Spesifik)</h4><ul><li>Kulit &amp; membran mukus</li><li>Keradangan, demam, neutrofil</li><li>Sel NK, komplemen, interferon</li></ul></div>
+      <div class="info-box"><h4>Adaptif (Spesifik)</h4><ul><li>Sel-B → antibodi (humoral)</li><li>Sel-T sitotoksik (sel)</li><li>Sel memori (asas vaksin)</li></ul></div>
+    </div>
+    <div class="key-fact"><strong>📌</strong> ~600 nod limfa dalam badan. Nod membesar semasa jangkitan kerana sel imun berganda.</div>
+    <div class="quiz-section" id="quiz-d7"><div class="quiz-section-title"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>Kuiz: Sistem Limfatik</div><div id="qs-d7"></div><div class="quiz-score-bar"><span class="quiz-score-text" id="score-d7">Skor: 0 / 0</span><button class="quiz-reset-btn" onclick="resetQuiz('d7')">🔄 Cuba Semula</button></div></div>
+  </div></div>
+</div>
+
+<div class="detail-screen c8" id="d8">
+  <div class="detail-header"><div class="detail-icon">🫁</div><div><h2>8. Sistem Pernafasan</h2><div class="detail-subtitle">Respiratory System</div></div></div>
+  <div class="section-card"><div class="section-card-body">
+    <h3>Laluan Udara</h3>
+    <p>Hidung/Mulut → Farinks → Larinks → Trakea → Bronkus Primer → Bronkus Sekunder → Bronkiol → Bronkiol Terminal → Alveolus</p>
+    <div class="two-col">
+      <div class="info-box"><h4>Inspirasi</h4><ul><li>Diafragma mengecut (turun)</li><li>Otot interkostal luar mengecut</li><li>Isipadu dada meningkat → tekanan turun → udara masuk</li></ul></div>
+      <div class="info-box"><h4>Ekspirasi</h4><ul><li>Diafragma relaks (naik)</li><li>Isipadu dada berkurang → tekanan naik → udara keluar</li></ul></div>
+    </div>
+    <h3>Kapasiti Paru-paru</h3>
+    <table><tr><th>Parameter</th><th>Nilai (dewasa)</th></tr><tr><td>Isipadu Tidal (TV)</td><td>~500 mL</td></tr><tr><td>Kapasiti Vital (VC)</td><td>~4,600 mL</td></tr><tr><td>Kapasiti Jumlah (TLC)</td><td>~6,000 mL</td></tr><tr><td>Kadar normal</td><td>12–20 nafas/min</td></tr></table>
+    <div class="key-fact"><strong>📌</strong> Surfaktan melindungi alveolus daripada kolaps. Kekurangannya pada bayi pramatang menyebabkan NRDS.</div>
+    <div class="quiz-section" id="quiz-d8"><div class="quiz-section-title"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>Kuiz: Sistem Pernafasan</div><div id="qs-d8"></div><div class="quiz-score-bar"><span class="quiz-score-text" id="score-d8">Skor: 0 / 0</span><button class="quiz-reset-btn" onclick="resetQuiz('d8')">🔄 Cuba Semula</button></div></div>
+  </div></div>
+</div>
+
+<div class="detail-screen c9" id="d9">
+  <div class="detail-header"><div class="detail-icon">🫄</div><div><h2>9. Sistem Penghadaman</h2><div class="detail-subtitle">Digestive System</div></div></div>
+  <div class="section-card"><div class="section-card-body">
+    <h3>Proses Penghadaman</h3>
+    <ol><li><strong>Ingesti:</strong> pengambilan makanan</li><li><strong>Mekanikal:</strong> kunyahan, peristalsis, segmentasi</li><li><strong>Kimia:</strong> enzim memecah molekul besar</li><li><strong>Penyerapan:</strong> nutrien → darah/limfa</li><li><strong>Defekasi:</strong> buang sisa</li></ol>
+    <h3>Enzim &amp; Penghadaman</h3>
+    <table><tr><th>Organ</th><th>Enzim/Bahan</th><th>Substrat → Hasil</th></tr><tr><td>Mulut</td><td>Amilase saliva</td><td>Kanji → Maltosa</td></tr><tr><td>Perut</td><td>Pepsin (HCl, pH 1.5–3.5)</td><td>Protein → Peptida</td></tr><tr><td>Usus Kecil</td><td>Lipase, Amilase, Protease</td><td>Lemak/kanji/protein → monomer</td></tr><tr><td>Hati/Hempedu</td><td>Hempedu (bile)</td><td>Emulsifikasi lemak</td></tr></table>
+    <div class="key-fact"><strong>📌</strong> Usus kecil panjang <strong>6–7 m</strong>, permukaan penyerapan ~250 m² (villi &amp; mikrovilli).</div>
+    <div class="quiz-section" id="quiz-d9"><div class="quiz-section-title"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>Kuiz: Sistem Penghadaman</div><div id="qs-d9"></div><div class="quiz-score-bar"><span class="quiz-score-text" id="score-d9">Skor: 0 / 0</span><button class="quiz-reset-btn" onclick="resetQuiz('d9')">🔄 Cuba Semula</button></div></div>
+  </div></div>
+</div>
+
+<div class="detail-screen c10" id="d10">
+  <div class="detail-header"><div class="detail-icon">🫘</div><div><h2>10. Sistem Urinari</h2><div class="detail-subtitle">Urinary System</div></div></div>
+  <div class="section-card"><div class="section-card-body">
+    <h3>Komponen</h3>
+    <table><tr><th>Organ</th><th>Fungsi</th></tr><tr><td>Ginjal (2)</td><td>Tapisan darah, pembentukan urin, keseimbangan elektrolit &amp; pH</td></tr><tr><td>Ureter (2)</td><td>Saluran ginjal → pundi kencing</td></tr><tr><td>Pundi Kencing</td><td>Simpan urin (~500 mL)</td></tr><tr><td>Uretra</td><td>Saluran membuang urin</td></tr></table>
+    <h3>Pembentukan Urin dalam Nefron</h3>
+    <ol><li><strong>Penapisan Glomerular:</strong> cecair tolak dari kapilari ke kapsul Bowman</li><li><strong>Reabsorpsi:</strong> glukosa, asid amino, Na⁺, air diserap semula</li><li><strong>Penyekresian Tubular:</strong> H⁺, K⁺, ubat, toksin → lumen tubul</li><li><strong>Pengumpulan:</strong> urin pekat → pelvis renal → ureter</li></ol>
+    <div class="key-fact"><strong>📌</strong> Setiap ginjal: ~1 juta nefron. Tapisan: ~180 L/hari, urin dikeluarkan: ~1.5 L/hari.</div>
+    <div class="quiz-section" id="quiz-d10"><div class="quiz-section-title"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>Kuiz: Sistem Urinari</div><div id="qs-d10"></div><div class="quiz-score-bar"><span class="quiz-score-text" id="score-d10">Skor: 0 / 0</span><button class="quiz-reset-btn" onclick="resetQuiz('d10')">🔄 Cuba Semula</button></div></div>
+  </div></div>
+</div>
+
+<div class="detail-screen c11" id="d11">
+  <div class="detail-header"><div class="detail-icon">🔬</div><div><h2>11. Sistem Reproduktif</h2><div class="detail-subtitle">Reproductive System</div></div></div>
+  <div class="section-card"><div class="section-card-body">
+    <div class="two-col">
+      <div class="info-box"><h4>Sistem Wanita</h4><table><tr><th>Organ</th><th>Fungsi</th></tr><tr><td>Ovari</td><td>Ovum &amp; estrogen/progesteron</td></tr><tr><td>Tiub Fallopian</td><td>Laluan ovum, tapak persenyawaan</td></tr><tr><td>Uterus</td><td>Implantasi &amp; perkembangan fetus</td></tr><tr><td>Serviks &amp; Faraj</td><td>Hubungan &amp; saluran kelahiran</td></tr></table></div>
+      <div class="info-box"><h4>Sistem Lelaki</h4><table><tr><th>Organ</th><th>Fungsi</th></tr><tr><td>Testis</td><td>Sperma &amp; testosteron</td></tr><tr><td>Epididimis</td><td>Pematangan &amp; simpan sperma</td></tr><tr><td>Vas Deferens</td><td>Saluran sperma → uretra</td></tr><tr><td>Prostat</td><td>Cecair seminal alkali</td></tr></table></div>
+    </div>
+    <h3>Kitaran Haid</h3>
+    <table><tr><th>Fasa</th><th>Hari</th><th>Peristiwa</th></tr><tr><td>Menstruasi</td><td>1–5</td><td>Luruhnya endometrium</td></tr><tr><td>Folikuler</td><td>1–13</td><td>FSH → folikel matang, estrogen ↑</td></tr><tr><td>Ovulasi</td><td>~14</td><td>Lonjakan LH → ovum dibebaskan</td></tr><tr><td>Luteal</td><td>15–28</td><td>Progesteron ↑; tanpa persenyawaan → haid</td></tr></table>
+    <div class="key-fact"><strong>📌</strong> Persenyawaan berlaku di tiub Fallopian dalam 12–24 jam post-ovulasi. Implantasi dalam 6–10 hari.</div>
+    <div class="quiz-section" id="quiz-d11"><div class="quiz-section-title"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>Kuiz: Sistem Reproduktif</div><div id="qs-d11"></div><div class="quiz-score-bar"><span class="quiz-score-text" id="score-d11">Skor: 0 / 0</span><button class="quiz-reset-btn" onclick="resetQuiz('d11')">🔄 Cuba Semula</button></div></div>
+  </div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     QUIZ MASTER SCREEN
+════════════════════════════════════════════ -->
+<div id="quizMasterScreen">
+  <div class="qm-header">
+    <h2>🎯 Kuiz Besar — Semua Sistem</h2>
+    <p>33 soalan rawak merentasi 11 sistem badan manusia</p>
+    <div class="qm-progress"><div class="qm-progress-fill" id="qmProgressFill" style="width:0%"></div></div>
+    <div class="qm-progress-label" id="qmProgressLabel">Soalan 0 / 33</div>
+  </div>
+  <div id="qmQuestionArea"></div>
+</div>
+
+<footer style="text-align:center;border-top:1px solid #E8EAED;padding:16px;color:#9AA0A6;font-size:12px;background:#fff;margin-top:40px">
+  Nota Anatomi &amp; Fisiologi — Dashboard + Kuiz Interaktif &nbsp;|&nbsp; <strong>Made with IBM Bob</strong>
+</footer>
+
+<!-- ═══════════════════════════════════════════
+     JAVASCRIPT — QUIZ ENGINE
+════════════════════════════════════════════ -->
+<script>
+/* ─────────────────────────────────────────────
+   QUESTION BANK  (3 per system = 33 total)
+───────────────────────────────────────────── */
+const QUESTIONS = {
+  d1:[
+    {q:"Apakah lapisan epidermis paling luar?",opts:["Stratum Spinosum","Stratum Corneum","Stratum Basale","Stratum Granulosum"],ans:1,exp:"Stratum Corneum adalah lapisan paling luar epidermis — terdiri daripada sel mati yang penuh keratin."},
+    {q:"Sel apakah yang menghasilkan melanin di kulit?",opts:["Keratinosit","Fibroblas","Melanosit","Sel Langerhans"],ans:2,exp:"Melanosit terletak di stratum basale dan menghasilkan melanin yang melindungi DNA daripada UV."},
+    {q:"Fungsi utama kelenjar ekrin (ekrine gland) ialah?",opts:["Menghasilkan minyak rambut","Pengaturan suhu melalui peluh","Menghasilkan melanin","Menapis patogen"],ans:1,exp:"Kelenjar ekrin (kelenjar peluh) merembes peluh untuk mengatur suhu badan — termoregulasi."},
+  ],
+  d2:[
+    {q:"Berapakah jumlah tulang dalam badan manusia dewasa?",opts:["180","196","206","215"],ans:2,exp:"Badan manusia dewasa mempunyai 206 tulang."},
+    {q:"Sel apakah yang membina tulang baru?",opts:["Osteoklast","Kondrosit","Osteosit","Osteoblas"],ans:3,exp:"Osteoblas membina (mendeposit) tisu tulang baru. Osteoklast pula memecah tulang."},
+    {q:"Tulang femur tergolong dalam jenis tulang apakah?",opts:["Tulang pipih","Tulang sesamoid","Tulang panjang","Tulang pendek"],ans:2,exp:"Femur adalah tulang paha — contoh klasik tulang panjang yang mempunyai diafisis dan epifisis."},
+  ],
+  d3:[
+    {q:"Jenis otot manakah yang bergarisan dan berada di bawah kawalan sukarela?",opts:["Otot licin","Otot jantung","Otot rangka","Otot visceral"],ans:2,exp:"Otot rangka bersifat bergaris (striated) dan dikawal secara sukarela (voluntary)."},
+    {q:"Neurotransmitter yang dibebaskan di persimpangan neuromuskular (NMJ) ialah?",opts:["Dopamin","Adrenalin","Serotonin","Asetilkolin (ACh)"],ans:3,exp:"Asetilkolin (ACh) dibebaskan di NMJ untuk mencetuskan depolarisasi dan kontraksi otot."},
+    {q:"Apakah ion yang diperlukan untuk mendedahkan tapak aktif aktin semasa kontraksi otot?",opts:["Na⁺","K⁺","Ca²⁺","Mg²⁺"],ans:2,exp:"Ion kalsium (Ca²⁺) terikat pada troponin untuk mendedahkan tapak aktif aktin bagi kepala myosin."},
+  ],
+  d4:[
+    {q:"Bahagian otak manakah yang mengawal keseimbangan dan koordinasi pergerakan?",opts:["Serebrum","Hipotalamus","Batang Otak","Serebellum"],ans:3,exp:"Serebellum mengawal keseimbangan, koordinasi pergerakan halus dan postur badan."},
+    {q:"Neuron aferen berfungsi untuk?",opts:["Menghantar arahan motor ke otot","Memproses maklumat dalam SSP","Menghantar isyarat deria ke SSP","Merembes neurotransmitter"],ans:2,exp:"Neuron aferen (sensori) membawa impuls dari organ deria / periferi ke SSP untuk diproses."},
+    {q:"Sarung mielin berfungsi untuk?",opts:["Menghasilkan ATP untuk neuron","Meningkatkan kelajuan pengaliran impuls","Merembes neurotransmitter","Membahagi sel saraf"],ans:1,exp:"Sarung mielin meningkatkan kelajuan konduksi impuls melalui konduksi saltatori di nod Ranvier (sehingga 120 m/s)."},
+  ],
+  d5:[
+    {q:"Hormon apakah yang dirembes pankreas untuk menurunkan glukosa darah?",opts:["Glukagon","Kortisol","Adrenalin","Insulin"],ans:3,exp:"Insulin dirembes oleh sel beta pankreas (islet Langerhans) untuk menurunkan glukosa darah."},
+    {q:"Kelenjar endokrin manakah dikenali sebagai 'master gland'?",opts:["Tiroid","Adrenal","Pituitari","Pineal"],ans:2,exp:"Kelenjar pituitari (hipofisis) dikenali sebagai master gland kerana mengawal kebanyakan kelenjar endokrin lain."},
+    {q:"Melatonin dirembes oleh kelenjar manakah?",opts:["Tiroid","Adrenal","Timus","Pineal"],ans:3,exp:"Kelenjar pineal di otak mengrembes melatonin yang mengawal kitaran sirkadian (tidur/bangun)."},
+  ],
+  d6:[
+    {q:"Berapakah peratus plasma dalam komposisi darah?",opts:["44%","55%","30%","10%"],ans:1,exp:"Plasma membentuk ~55% daripada isipadu darah, mengandungi air, protein, nutrien dan hormon."},
+    {q:"Kumpulan darah manakah yang dikenali sebagai 'penderma universal'?",opts:["A","B","AB","O"],ans:3,exp:"Kumpulan darah O tidak mempunyai antigen A mahupun B, jadi boleh diderma kepada semua kumpulan."},
+    {q:"Perentak semula jadi jantung ialah?",opts:["Nod AV","Berkas His","Simpul SA (sinoatrial)","Gentian Purkinje"],ans:2,exp:"Simpul SA (sinoatrial node) di atrium kanan adalah perentak semula jadi yang mencetuskan degupan jantung."},
+  ],
+  d7:[
+    {q:"Berapakah anggaran jumlah nod limfa dalam badan manusia?",opts:["~200","~400","~600","~1000"],ans:2,exp:"Terdapat kira-kira 600 nod limfa di seluruh badan manusia."},
+    {q:"Sel apakah yang menghasilkan antibodi dalam imuniti adaptif?",opts:["Sel T sitotoksik","Sel NK","Sel B","Neutrofil"],ans:2,exp:"Sel B (limfosit B) bertukar menjadi sel plasma yang menghasilkan antibodi dalam imuniti humoral."},
+    {q:"Organ limfoid manakah yang bertanggungjawab mematangkan sel-T?",opts:["Limpa","Timus","Nod limfa","Tonsil"],ans:1,exp:"Timus adalah tempat sel-T dimatangkan dan diasuh untuk membezakan 'self' daripada 'non-self'."},
+  ],
+  d8:[
+    {q:"Di manakah berlakunya pertukaran gas O₂ dan CO₂ dalam sistem pernafasan?",opts:["Trakea","Bronkus","Larinks","Alveolus"],ans:3,exp:"Pertukaran gas berlaku di alveolus — O₂ meresap ke kapilari darah dan CO₂ meresap keluar."},
+    {q:"Otot manakah yang paling utama dalam proses inspirasi?",opts:["Otot perut","Diafragma","Otot interkostal dalam","Otot trapezius"],ans:1,exp:"Diafragma mengecut dan bergerak turun semasa inspirasi, meningkatkan isipadu rongga dada."},
+    {q:"Apakah fungsi surfaktan di alveolus?",opts:["Menapis udara","Menghasilkan O₂","Mencegah kolaps alveolus","Meningkatkan takat didih air"],ans:2,exp:"Surfaktan mengurangkan tegangan permukaan alveolus dan mencegahnya daripada kolaps (atelektasis)."},
+  ],
+  d9:[
+    {q:"Enzim apakah yang terdapat dalam saliva untuk mencernakan kanji?",opts:["Lipase","Pepsin","Amilase","Tripsin"],ans:2,exp:"Amilase saliva (ptyalin) memulakan pencernaan kanji → maltosa di dalam mulut."},
+    {q:"Di manakah penyerapan utama nutrien berlaku dalam sistem penghadaman?",opts:["Perut","Usus besar","Usus kecil","Esofagus"],ans:2,exp:"Usus kecil (terutama jejunum dan ileum) adalah tapak utama penyerapan nutrien ke dalam darah/limfa."},
+    {q:"Apakah fungsi hempedu (bile) yang dihasilkan hati?",opts:["Mencernakan protein","Memecah RNA","Menghasilkan insulin","Mengemulsikan lemak"],ans:3,exp:"Hempedu (bile) mengemulsikan (memecah) titisan lemak besar menjadi titisan lebih kecil supaya lipase dapat bertindak."},
+  ],
+  d10:[
+    {q:"Berapa jumlah nefron dalam setiap ginjal manusia?",opts:["~100,000","~500,000","~1,000,000","~5,000,000"],ans:2,exp:"Setiap ginjal mengandungi kira-kira 1 juta nefron sebagai unit penapisan asas."},
+    {q:"Proses apakah yang berlaku pertama dalam pembentukan urin?",opts:["Penyekresian tubular","Reabsorpsi","Penapisan glomerular","Pengumpulan"],ans:2,exp:"Penapisan glomerular adalah langkah pertama — tekanan darah tolak cecair dari kapilari ke kapsul Bowman."},
+    {q:"Hormon ADH (antidiuretik) berfungsi untuk?",opts:["Meningkatkan pengeluaran urin","Meningkatkan penyerapan semula air di tubul","Meningkatkan Na⁺ dalam darah","Mengurangkan tekanan darah"],ans:1,exp:"ADH meningkatkan penyerapan semula air di tubul pengumpul ginjal, mengurangkan jumlah urin (anti-diuretik)."},
+  ],
+  d11:[
+    {q:"Di manakah berlakunya persenyawaan ovum dan sperma?",opts:["Uterus","Faraj","Serviks","Tiub Fallopian"],ans:3,exp:"Persenyawaan biasanya berlaku di bahagian ampulla tiub Fallopian dalam masa 12–24 jam selepas ovulasi."},
+    {q:"Hormon LH (luteinizing hormone) bertanggungjawab untuk?",opts:["Mematangkan folikel ovari","Mencetuskan ovulasi","Mengekalkan endometrium","Menghasilkan estrogen"],ans:1,exp:"Lonjakan LH mencetuskan ovulasi — pelepasan ovum matang dari folikel de Graaf (~hari ke-14)."},
+    {q:"Sel manakah yang menghasilkan sperma dalam testis?",opts:["Sel Sertoli","Sel Leydig","Sel spermatogonia","Sel Kupffer"],ans:2,exp:"Spermatogonia adalah sel stem dalam tubul seminiferus yang mengalami spermatogenesis untuk menghasilkan sperma."},
+  ],
+};
+
+/* ─────────────────────────────────────────────
+   PER-SYSTEM QUIZ RENDERING
+───────────────────────────────────────────── */
+const quizState = {}; // {dN: {answered:[], score:0}}
+
+function renderQuiz(id){
+  const qs = QUESTIONS[id];
+  if(!qs) return;
+  quizState[id] = {answered: new Array(qs.length).fill(false), score:0};
+  const container = document.getElementById('qs-'+id);
+  container.innerHTML = qs.map((q,i)=>`
+    <div class="quiz-q" id="qq-${id}-${i}">
+      <div class="quiz-q-num">Soalan ${i+1}</div>
+      <div class="quiz-q-text">${q.q}</div>
+      <div class="quiz-options">
+        ${q.opts.map((o,j)=>`
+          <div class="quiz-opt" id="qo-${id}-${i}-${j}" onclick="pickOpt('${id}',${i},${j})">
+            <div class="quiz-opt-marker">${'ABCD'[j]}</div>
+            <span>${o}</span>
+          </div>
+        `).join('')}
+      </div>
+      <div class="quiz-feedback" id="qf-${id}-${i}"></div>
+    </div>
+  `).join('');
+  updateScore(id);
+}
+
+function pickOpt(id, qi, oi){
+  const qs = QUESTIONS[id];
+  const state = quizState[id];
+  if(state.answered[qi]) return;
+  state.answered[qi] = true;
+  const q = qs[qi];
+  const correct = (oi === q.ans);
+  if(correct) state.score++;
+  // Style all options
+  const opts = document.querySelectorAll(`[id^="qo-${id}-${qi}-"]`);
+  opts.forEach((el,j)=>{
+    el.classList.add('disabled');
+    if(j===q.ans) el.classList.add('correct');
+    else if(j===oi && !correct) el.classList.add('wrong');
+  });
+  // Feedback
+  const fb = document.getElementById(`qf-${id}-${qi}`);
+  fb.className = `quiz-feedback show ${correct?'ok':'fail'}`;
+  fb.textContent = correct ? '✅ Betul! '+q.exp : '❌ Salah. '+q.exp;
+  updateScore(id);
+}
+
+function updateScore(id){
+  const state = quizState[id];
+  const total = QUESTIONS[id].length;
+  const answered = state.answered.filter(Boolean).length;
+  document.getElementById('score-'+id).textContent =
+    `Skor: ${state.score} / ${answered} (daripada ${total} soalan)`;
+}
+
+function resetQuiz(id){
+  renderQuiz(id);
+}
+
+/* ─────────────────────────────────────────────
+   QUIZ MASTER  (all 33 Qs shuffled)
+───────────────────────────────────────────── */
+let qmAll = [], qmIndex = 0, qmScore = 0, qmAnswered = false;
+
+function buildQMPool(){
+  qmAll = [];
+  const sysNames = {d1:'Integumen',d2:'Skeletal',d3:'Otot',d4:'Saraf',d5:'Endokrin',d6:'Peredaran Darah',d7:'Limfatik',d8:'Pernafasan',d9:'Penghadaman',d10:'Urinari',d11:'Reproduktif'};
+  Object.entries(QUESTIONS).forEach(([sid,qs])=>{
+    qs.forEach(q=>qmAll.push({...q, sys:sysNames[sid]}));
+  });
+  // Fisher-Yates shuffle
+  for(let i=qmAll.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [qmAll[i],qmAll[j]]=[qmAll[j],qmAll[i]];
+  }
+}
+
+function startQuizMaster(){
+  buildQMPool();
+  qmIndex=0; qmScore=0; qmAnswered=false;
+  document.getElementById('homeView').style.display='none';
+  if(currentDetail){currentDetail.classList.remove('active');currentDetail=null;}
+  const qms=document.getElementById('quizMasterScreen');
+  qms.classList.add('active');
+  document.getElementById('appBarTitle').textContent='🎯 Kuiz Besar';
+  document.getElementById('backBtn').classList.add('visible');
+  document.getElementById('appBarChips').style.display='none';
+  window.scrollTo({top:0,behavior:'smooth'});
+  renderQMQuestion();
+}
+
+function renderQMQuestion(){
+  const area=document.getElementById('qmQuestionArea');
+  if(qmIndex>=qmAll.length){
+    // Results
+    const pct=Math.round(qmScore/qmAll.length*100);
+    let grade=''; let emoji='';
+    if(pct>=90){grade='Cemerlang! 🏆';emoji='🌟';}
+    else if(pct>=70){grade='Bagus! 👍';emoji='😊';}
+    else if(pct>=50){grade='Boleh Lagi! 💪';emoji='📚';}
+    else{grade='Perlu Ulangkaji 📖';emoji='🔄';}
+    area.innerHTML=`
+      <div class="qm-result">
+        <div style="font-size:48px;margin-bottom:8px">${emoji}</div>
+        <h3>${grade}</h3>
+        <div class="score-big">${qmScore}/${qmAll.length}</div>
+        <p>Anda menjawab ${pct}% dengan betul.<br>Teruskan belajar untuk keputusan lebih baik!</p>
+        <button class="qm-btn" onclick="startQuizMaster()">🔄 Cuba Semula</button>
+        <button class="qm-btn" style="margin-left:10px;background:rgba(255,255,255,0.2)" onclick="showHome()">🏠 Kembali</button>
+      </div>`;
+    document.getElementById('qmProgressFill').style.width='100%';
+    document.getElementById('qmProgressLabel').textContent=`Selesai! ${qmAll.length}/${qmAll.length}`;
+    return;
+  }
+  const q=qmAll[qmIndex];
+  qmAnswered=false;
+  document.getElementById('qmProgressFill').style.width=`${(qmIndex/qmAll.length)*100}%`;
+  document.getElementById('qmProgressLabel').textContent=`Soalan ${qmIndex+1} / ${qmAll.length}`;
+  area.innerHTML=`
+    <div class="qm-card">
+      <span class="qm-sys-tag">${q.sys}</span>
+      <div class="qm-q-text">${q.q}</div>
+      <div class="qm-options">
+        ${q.opts.map((o,j)=>`
+          <div class="qm-opt" id="qmo-${j}" onclick="pickQMOpt(${j})">
+            <div class="qm-opt-letter">${'ABCD'[j]}</div>
+            <span>${o}</span>
+          </div>`).join('')}
+      </div>
+      <div class="qm-feedback" id="qmFeedback"></div>
+    </div>
+    <div class="qm-nav">
+      <span style="font-size:13px;color:#6B7280">Skor semasa: <strong>${qmScore}</strong></span>
+      <button class="qm-btn" id="qmNextBtn" onclick="nextQMQuestion()" disabled>Soalan Seterusnya →</button>
+    </div>`;
+}
+
+function pickQMOpt(oi){
+  if(qmAnswered) return;
+  qmAnswered=true;
+  const q=qmAll[qmIndex];
+  const correct=(oi===q.ans);
+  if(correct) qmScore++;
+  document.querySelectorAll('[id^="qmo-"]').forEach((el,j)=>{
+    el.classList.add('disabled');
+    if(j===q.ans) el.classList.add('correct');
+    else if(j===oi&&!correct) el.classList.add('wrong');
+  });
+  const fb=document.getElementById('qmFeedback');
+  fb.className=`qm-feedback show ${correct?'ok':'fail'}`;
+  fb.textContent=correct?'✅ Betul! '+q.exp:'❌ Salah. '+q.exp;
+  document.getElementById('qmNextBtn').disabled=false;
+}
+
+function nextQMQuestion(){
+  qmIndex++;
+  renderQMQuestion();
+}
+
+/* ─────────────────────────────────────────────
+   SPA ROUTING
+───────────────────────────────────────────── */
+const homeView=document.getElementById('homeView');
+const backBtn=document.getElementById('backBtn');
+const appBarChips=document.getElementById('appBarChips');
+const appBarTitle=document.getElementById('appBarTitle');
+let currentDetail=null;
+
+function showDetail(id,title){
+  homeView.style.display='none';
+  if(currentDetail) currentDetail.classList.remove('active');
+  const el=document.getElementById(id);
+  el.classList.add('active');
+  currentDetail=el;
+  appBarTitle.textContent=title;
+  backBtn.classList.add('visible');
+  appBarChips.style.display='none';
+  window.scrollTo({top:0,behavior:'smooth'});
+  // Render quiz if not yet rendered
+  if(QUESTIONS[id] && !quizState[id]) renderQuiz(id);
+}
+
+function showHome(){
+  if(currentDetail){currentDetail.classList.remove('active');currentDetail=null;}
+  document.getElementById('quizMasterScreen').classList.remove('active');
+  homeView.style.display='block';
+  appBarTitle.textContent='Anatomi & Fisiologi';
+  backBtn.classList.remove('visible');
+  appBarChips.style.display='flex';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function filterCards(q){
+  const v=q.toLowerCase().trim();
+  document.querySelectorAll('#cardGrid .card').forEach(c=>{
+    const n=(c.dataset.name||'').toLowerCase();
+    const t=(c.querySelector('.card-title')||{textContent:''}).textContent.toLowerCase();
+    c.style.display=(n.includes(v)||t.includes(v)||v==='')?'':'none';
+  });
+}
+</script>
+</body>
+</html>
